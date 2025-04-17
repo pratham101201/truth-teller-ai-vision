@@ -6,6 +6,7 @@ import UploadSection from '../components/UploadSection';
 import ResultsDisplay from '../components/ResultsDisplay';
 import AboutSection from '../components/AboutSection';
 import Footer from '../components/Footer';
+import HeroBackground from '../components/HeroBackground';
 import { AnalysisResult } from '@/types/types';
 
 const Index = () => {
@@ -42,22 +43,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       
-      {analysisResult && analyzedFile && filePreview ? (
-        <ResultsDisplay 
-          result={analysisResult} 
-          mediaFile={analyzedFile}
-          mediaPreview={filePreview}
-          onReset={resetAnalysis}
-        />
-      ) : (
-        <>
-          <Hero />
-          <UploadSection onAnalysisComplete={handleAnalysisComplete} />
-        </>
-      )}
+      <div className="relative overflow-hidden">
+        <HeroBackground />
+        {analysisResult && analyzedFile && filePreview ? (
+          <ResultsDisplay 
+            result={analysisResult} 
+            mediaFile={analyzedFile}
+            mediaPreview={filePreview}
+            onReset={resetAnalysis}
+          />
+        ) : (
+          <>
+            <Hero />
+            <UploadSection onAnalysisComplete={handleAnalysisComplete} />
+          </>
+        )}
+      </div>
       
       <AboutSection />
       <Footer />
