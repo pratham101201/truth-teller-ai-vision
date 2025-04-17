@@ -1,12 +1,66 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import UploadSection from '../components/UploadSection';
+import ResultsDisplay from '../components/ResultsDisplay';
+import AboutSection from '../components/AboutSection';
+import Footer from '../components/Footer';
+import { AnalysisResult } from '@/types/types';
 
 const Index = () => {
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [analyzedFile, setAnalyzedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+
+  const handleAnalysisComplete = (result: AnalysisResult, file: File) => {
+    setAnalysisResult(result);
+    setAnalyzedFile(file);
+    
+    // If we don't already have a file preview, create one
+    if (!filePreview) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFilePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Scroll to results
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 100);
+  };
+
+  const resetAnalysis = () => {
+    setAnalysisResult(null);
+    setAnalyzedFile(null);
+    setFilePreview(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
+      {analysisResult && analyzedFile && filePreview ? (
+        <ResultsDisplay 
+          result={analysisResult} 
+          mediaFile={analyzedFile}
+          mediaPreview={filePreview}
+          onReset={resetAnalysis}
+        />
+      ) : (
+        <>
+          <Hero />
+          <UploadSection onAnalysisComplete={handleAnalysisComplete} />
+        </>
+      )}
+      
+      <AboutSection />
+      <Footer />
     </div>
   );
 };
