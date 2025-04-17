@@ -1,4 +1,5 @@
-import { AnalysisRequest, AnalysisResult } from '../types/types';
+
+import { AnalysisRequest, AnalysisResult, AnalysisStats } from '../types/types';
 
 // This simulates API endpoints for deepfake detection
 // In a real implementation, this would make actual API calls to a Python backend
@@ -10,6 +11,9 @@ export const AnalysisService = {
     // Simulate network delay based on analysis type
     const delayTime = request.analysisType === 'quick' ? 1000 : 
                       request.analysisType === 'enhanced' ? 4000 : 2000;
+    
+    // Add more delay if prioritizing accuracy
+    const totalDelay = request.prioritizeAccuracy ? delayTime * 1.5 : delayTime;
     
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -39,9 +43,9 @@ export const AnalysisService = {
           ? baseConfidence
           : 1 - (baseConfidence * 0.5); // Higher confidence for authentic media
         
-        // Generate detection areas with more realistic patterns
+        // Generate detection areas with more realistic patterns if requested
         let detectionAreas = undefined;
-        if (isDeepfake) {
+        if (isDeepfake && request.detectRegions !== false) {
           // For images, focus on face areas (eyes, mouth, etc.)
           const faceAreasCount = request.file.type.startsWith('image/') ? 
                                 Math.floor(deterministicFactor * 3) + 1 : 1;
@@ -78,11 +82,25 @@ export const AnalysisService = {
             });
         }
         
-        // More detailed analysis messages
+        // More detailed analysis features and techniques
         const detectionFeatures = isDeepfake ? 
-          ['facial_inconsistency', 'unnatural_lighting', 'blink_pattern']
-            .slice(0, Math.floor(deterministicFactor * 3) + 1) : 
+          ['facial_inconsistency', 'unnatural_lighting', 'blink_pattern', 'edge_artifacts', 'noise_pattern']
+            .slice(0, Math.floor(deterministicFactor * 5) + 1) : 
           undefined;
+          
+        const techniqueUsed = isDeepfake ?
+          `CNN-based anomaly detection${request.analysisType === 'enhanced' ? ' with frequency domain analysis' : ''}` :
+          undefined;
+        
+        // Generate media metadata
+        const mediaMetadata = {
+          dimensions: request.file.type.startsWith('image/') ? 
+            { width: 1000 + Math.floor(deterministicFactor * 1000), height: 800 + Math.floor(deterministicFactor * 600) } :
+            { width: 1920, height: 1080 },
+          format: request.file.type,
+          duration: request.file.type.startsWith('video/') ? 15 + Math.floor(deterministicFactor * 45) : undefined,
+          frameRate: request.file.type.startsWith('video/') ? 24 + Math.floor(deterministicFactor * 6) : undefined,
+        };
         
         const message = isDeepfake 
           ? `Our AI has detected ${detectionAreas?.length || 'several'} areas with signs of manipulation${
@@ -95,14 +113,16 @@ export const AnalysisService = {
           isDeepfake,
           confidenceScore,
           detectionAreas,
-          analysisTime: (Math.random() * 1.5) + (delayTime / 1000),
+          analysisTime: (Math.random() * 1.5) + (totalDelay / 1000),
           message,
           analysisId: `analysis-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
           timestamp: new Date().toISOString(),
-          modelVersion: "deepfake-detector-v1.2.0",
+          modelVersion: `deepfake-detector-v${request.analysisType === 'enhanced' ? '2.1.0' : '1.2.0'}`,
           detectionFeatures: isDeepfake ? detectionFeatures : undefined,
+          techniqueUsed: techniqueUsed,
+          mediaMetadata: mediaMetadata,
         });
-      }, delayTime);
+      }, totalDelay);
     });
   },
   
@@ -113,6 +133,20 @@ export const AnalysisService = {
         // In the future, this would retrieve history from the database
         resolve([]);
       }, 500);
+    });
+  },
+  
+  // Simulate retrieving analysis statistics (for future implementation)
+  getAnalysisStats: async (): Promise<AnalysisStats> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          totalAnalyzed: Math.floor(Math.random() * 10000) + 500,
+          deepfakesDetected: Math.floor(Math.random() * 300) + 100,
+          averageConfidence: 0.78 + (Math.random() * 0.1),
+          averageAnalysisTime: 2.3 + (Math.random() * 0.5)
+        });
+      }, 300);
     });
   }
 };
