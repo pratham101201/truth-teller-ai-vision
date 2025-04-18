@@ -1,11 +1,19 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Shield } from 'lucide-react';
+import { Shield, User } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar: React.FC = () => {
   const { user } = useAuth();
@@ -27,7 +35,7 @@ const Navbar: React.FC = () => {
   return (
     <header className="w-full py-4 border-b border-slate-200 bg-white">
       <div className="container flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
           <Shield className="h-6 w-6 text-truth-600" />
           <span className="font-bold text-xl text-truth-900">TruthTeller</span>
         </div>
@@ -46,12 +54,24 @@ const Navbar: React.FC = () => {
         
         <div className="flex items-center gap-2">
           {user ? (
-            <>
-              <span className="text-sm text-slate-600 mr-2">{user.email}</span>
-              <Button variant="ghost" onClick={handleSignOut}>
-                Sign Out
-              </Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="max-w-[120px] truncate">{user.email}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Button variant="ghost" onClick={() => navigate('/auth')}>

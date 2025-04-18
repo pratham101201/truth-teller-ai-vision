@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import Navbar from '../components/Navbar';
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [analyzedFile, setAnalyzedFile] = useState<File | null>(null);
@@ -23,7 +22,6 @@ const Index = () => {
     setAnalysisResult(result);
     setAnalyzedFile(file);
     
-    // If we don't already have a file preview, create one
     if (!filePreview) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -32,7 +30,6 @@ const Index = () => {
       reader.readAsDataURL(file);
     }
 
-    // Scroll to results
     setTimeout(() => {
       window.scrollTo({
         top: 0,
@@ -51,29 +48,20 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-8">
-        {user ? (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">Welcome, {user.email}</h2>
-            <p>You are currently logged in.</p>
-            {session && (
-              <div className="mt-4">
-                <p>Session Details:</p>
-                <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-x-auto">
-                  {JSON.stringify(session, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
-            <Button onClick={() => navigate('/auth')}>
-              Go to Login/Signup
-            </Button>
-          </div>
-        )}
-      </div>
+      {!user && (
+        <div className="container mx-auto px-4 py-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">Unlock All Features</h2>
+          <p className="mb-4 text-gray-600 max-w-2xl mx-auto">
+            Create an account to save your analysis history, access advanced features, and more.
+          </p>
+          <Button 
+            onClick={() => navigate('/auth')}
+            className="bg-truth-600 hover:bg-truth-700"
+          >
+            Sign Up Now
+          </Button>
+        </div>
+      )}
       
       <div className="relative overflow-hidden">
         <HeroBackground />
