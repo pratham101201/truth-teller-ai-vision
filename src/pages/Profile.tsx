@@ -42,28 +42,35 @@ const Profile = () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, avatar_url')
-        .eq('id', user?.id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      
-      if (data) {
-        setProfileData({
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
-          avatar_url: data.avatar_url
-        });
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, avatar_url')
+          .eq('id', user?.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+          // If the error is because the table doesn't exist, we'll just use the empty state
+          // but we won't show an error message for this specific case
+          if (!error.message.includes('relation "public.profiles" does not exist')) {
+            toast({
+              title: "Error loading profile",
+              description: "There was a problem loading your profile information.",
+              variant: "destructive",
+            });
+          }
+        } else if (data) {
+          setProfileData({
+            first_name: data.first_name || '',
+            last_name: data.last_name || '',
+            avatar_url: data.avatar_url
+          });
+        }
+      } catch (error) {
+        console.error('Error in profile fetch:', error);
+        // Silently handle errors here - we'll just use the default empty state
       }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      toast({
-        title: "Error loading profile",
-        description: "There was a problem loading your profile information.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -73,28 +80,46 @@ const Profile = () => {
     try {
       setLoading(true);
       
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({ 
-          id: user?.id,
-          first_name: profileData.first_name,
-          last_name: profileData.last_name,
-          updated_at: new Date()
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: user?.id,
+            first_name: profileData.first_name,
+            last_name: profileData.last_name,
+            updated_at: new Date()
+          });
+        
+        if (error) {
+          console.error('Error updating profile:', error);
+          // Special handling for "table doesn't exist" error
+          if (error.message.includes('relation "public.profiles" does not exist')) {
+            toast({
+              title: "Database setup required",
+              description: "The profiles table needs to be created. Please follow the setup instructions.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Error updating profile",
+              description: "There was a problem updating your profile.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Profile updated",
+            description: "Your profile information has been updated successfully.",
+          });
+        }
+      } catch (error) {
+        console.error('Error in profile update:', error);
+        toast({
+          title: "Error updating profile",
+          description: "There was a problem with the update operation.",
+          variant: "destructive",
         });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
-      });
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Error updating profile",
-        description: "There was a problem updating your profile.",
-        variant: "destructive",
-      });
+      }
     } finally {
       setLoading(false);
     }
