@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -20,24 +20,31 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { error, data } = await supabase.auth.signUp({
           email,
           password,
         });
+        
         if (error) throw error;
+        
+        console.log('Sign up response:', data);
         toast({
           title: "Success!",
           description: "Please check your email to confirm your account.",
         });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
+        
+        console.log('Sign in response:', data);
         navigate('/');
       }
     } catch (error) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
         description: error.message,
