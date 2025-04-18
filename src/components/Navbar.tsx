@@ -2,8 +2,28 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Shield } from 'lucide-react';
+import { useAuth } from './AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 const Navbar: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <header className="w-full py-4 border-b border-slate-200 bg-white">
       <div className="container flex items-center justify-between">
@@ -25,12 +45,26 @@ const Navbar: React.FC = () => {
         </nav>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="hidden md:inline-flex">
-            Sign In
-          </Button>
-          <Button className="bg-truth-600 hover:bg-truth-700 text-white">
-            Get Started
-          </Button>
+          {user ? (
+            <>
+              <span className="text-sm text-slate-600 mr-2">{user.email}</span>
+              <Button variant="ghost" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={() => navigate('/auth')}>
+                Sign In
+              </Button>
+              <Button 
+                className="bg-truth-600 hover:bg-truth-700 text-white"
+                onClick={() => navigate('/auth')}
+              >
+                Get Started
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
