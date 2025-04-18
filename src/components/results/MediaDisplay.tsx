@@ -4,12 +4,9 @@ import { Button } from "@/components/ui/button";
 import { 
   Eye, 
   EyeOff, 
-  Download, 
-  Share2,
   AlertTriangle
 } from 'lucide-react';
 import { AnalysisResult } from '@/types/types';
-import { useToast } from '@/hooks/use-toast';
 import {
   TooltipProvider,
   Tooltip,
@@ -23,8 +20,6 @@ interface MediaDisplayProps {
   mediaPreview: string;
   showOriginal: boolean;
   setShowOriginal: (show: boolean) => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ 
@@ -32,12 +27,9 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
   mediaFile, 
   mediaPreview, 
   showOriginal, 
-  setShowOriginal,
-  activeTab,
-  setActiveTab
+  setShowOriginal
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { toast } = useToast();
   
   // Draw detection areas on canvas if result is a deepfake and has detection areas
   useEffect(() => {
@@ -85,53 +77,6 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
       img.src = mediaPreview;
     }
   }, [result, mediaPreview, mediaFile, showOriginal]);
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Deepfake Analysis Result',
-        text: `Media analysis result: ${result.isDeepfake ? 'Deepfake detected' : 'Likely authentic'} with ${result.confidenceScore * 100}% confidence.`,
-        url: window.location.href,
-      })
-      .catch(() => {
-        toast({
-          title: "Sharing failed",
-          description: "Could not share the results.",
-        });
-      });
-    } else {
-      // Fallback for browsers that don't support the Web Share API
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => {
-          toast({
-            title: "Link copied",
-            description: "Analysis result URL copied to clipboard.",
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Copy failed",
-            description: "Could not copy the URL to clipboard.",
-          });
-        });
-    }
-  };
-
-  const handleDownload = () => {
-    if (canvasRef.current && result.isDeepfake && result.detectionAreas && !showOriginal) {
-      // Download the analyzed image with detection areas highlighted
-      const link = document.createElement('a');
-      link.download = `analyzed-${mediaFile.name}`;
-      link.href = canvasRef.current.toDataURL();
-      link.click();
-    } else {
-      // Just download the original file
-      const link = document.createElement('a');
-      link.download = mediaFile.name;
-      link.href = mediaPreview;
-      link.click();
-    }
-  };
 
   return (
     <div className="relative bg-slate-100 rounded-lg overflow-hidden mb-4">

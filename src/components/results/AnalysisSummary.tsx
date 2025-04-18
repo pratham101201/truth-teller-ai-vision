@@ -1,23 +1,28 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import React from 'react';
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { 
-  Shield, 
   Info, 
+  ChevronDown, 
   ChevronUp, 
-  ChevronDown 
+  Shield 
 } from 'lucide-react';
 import { AnalysisResult } from '@/types/types';
 
 interface AnalysisSummaryProps {
   result: AnalysisResult;
   onReset: () => void;
+  showExplanation: boolean;
+  setShowExplanation: (show: boolean) => void;
 }
 
-const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ result, onReset }) => {
-  const [showExplanation, setShowExplanation] = useState(false);
-
+const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({ 
+  result, 
+  onReset,
+  showExplanation,
+  setShowExplanation
+}) => {
   return (
     <Card className="p-4 border border-slate-200">
       <h3 className="font-bold text-lg mb-3 flex items-center">

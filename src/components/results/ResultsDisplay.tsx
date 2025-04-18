@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from 'lucide-react';
 import { AnalysisResult } from '@/types/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from '@/hooks/use-toast';
 
-// Import our new components
+// Import our components
 import ResultStatus from './ResultStatus';
 import MediaDisplay from './MediaDisplay';
 import MediaControls from './MediaControls';
@@ -29,7 +28,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const [showExplanation, setShowExplanation] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("visual");
-  const { toast } = useToast();
   
   const handleShare = () => {
     if (navigator.share) {
@@ -39,25 +37,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         url: window.location.href,
       })
       .catch(() => {
-        toast({
-          title: "Sharing failed",
-          description: "Could not share the results.",
-        });
+        // Handle error silently
       });
     } else {
       // Fallback for browsers that don't support the Web Share API
       navigator.clipboard.writeText(window.location.href)
-        .then(() => {
-          toast({
-            title: "Link copied",
-            description: "Analysis result URL copied to clipboard.",
-          });
-        })
         .catch(() => {
-          toast({
-            title: "Copy failed",
-            description: "Could not copy the URL to clipboard.",
-          });
+          // Handle error silently
         });
     }
   };
@@ -65,18 +51,19 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const handleDownload = () => {
     if (result.isDeepfake && result.detectionAreas && !showOriginal) {
       // Download the analyzed image with detection areas highlighted
-      const link = document.createElement('a');
-      link.download = `analyzed-${mediaFile.name}`;
-      
-      // If we have a canvas element with detection areas, use that
       const canvasElement = document.querySelector('canvas');
       if (canvasElement) {
+        const link = document.createElement('a');
+        link.download = `analyzed-${mediaFile.name}`;
         link.href = canvasElement.toDataURL();
+        link.click();
       } else {
         // Fallback to the original image
+        const link = document.createElement('a');
+        link.download = mediaFile.name;
         link.href = mediaPreview;
+        link.click();
       }
-      link.click();
     } else {
       // Just download the original file
       const link = document.createElement('a');
@@ -103,47 +90,50 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
-              <Tabs defaultValue="visual" onValueChange={setActiveTab} className="mb-4">
+              <Tabs defaultValue="visual" value={activeTab} onValueChange={setActiveTab} className="mb-4">
                 <TabsList className="w-full grid grid-cols-2">
                   <TabsTrigger value="visual" className="text-sm">Visual Analysis</TabsTrigger>
                   <TabsTrigger value="technical" className="text-sm">Technical Details</TabsTrigger>
                 </TabsList>
+                
+                <TabsContent value="visual" className="mt-0">
+                  <MediaDisplay 
+                    result={result}
+                    mediaFile={mediaFile}
+                    mediaPreview={mediaPreview}
+                    showOriginal={showOriginal}
+                    setShowOriginal={setShowOriginal}
+                  />
+                  
+                  <MediaControls 
+                    handleDownload={handleDownload}
+                    handleShare={handleShare}
+                    showOriginal={showOriginal}
+                    setShowOriginal={setShowOriginal}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="technical" className="mt-0 space-y-4">
+                  <TechnicalDetails result={result} mediaFile={mediaFile} />
+                  
+                  <div className="flex justify-end">
+                    <Button variant="ghost" size="sm" className="text-sm text-slate-500">
+                      Download full report
+                    </Button>
+                  </div>
+                </TabsContent>
               </Tabs>
-              
-              <TabsContent value="visual" className="mt-0">
-                <MediaDisplay 
-                  result={result}
-                  mediaFile={mediaFile}
-                  mediaPreview={mediaPreview}
-                  showOriginal={showOriginal}
-                  setShowOriginal={setShowOriginal}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-                
-                <MediaControls 
-                  handleDownload={handleDownload}
-                  handleShare={handleShare}
-                  showOriginal={showOriginal}
-                  setShowOriginal={setShowOriginal}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-              </TabsContent>
-              
-              <TabsContent value="technical" className="mt-0 space-y-4">
-                <TechnicalDetails result={result} mediaFile={mediaFile} />
-                
-                <div className="flex justify-end">
-                  <Button variant="ghost" size="sm" className="text-sm text-slate-500">
-                    Download full report
-                  </Button>
-                </div>
-              </TabsContent>
             </div>
             
             <div className="md:col-span-1">
-              <AnalysisSummary result={result} onReset={onReset} />
+              <AnalysisSummary 
+                result={result} 
+                onReset={onReset} 
+                showExplanation={showExplanation}
+                setShowExplanation={setShowExplanation}
+              />
             </div>
           </div>
         </div>
