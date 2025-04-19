@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { AnalysisResult } from '@/types/types';
 import { toast } from '@/components/ui/use-toast';
 
@@ -11,18 +11,6 @@ export const useSupabase = () => {
   const saveAnalysisResult = async (result: AnalysisResult) => {
     setLoading(true);
     setError(null);
-
-    // Check if Supabase is configured
-    if (!isSupabaseConfigured()) {
-      setError('Supabase is not configured. Please add your Supabase credentials to the environment variables.');
-      toast({
-        title: 'Supabase Not Configured',
-        description: 'This is a development preview. Connect your Supabase project to enable data storage.',
-        variant: 'destructive',
-      });
-      setLoading(false);
-      return null;
-    }
 
     try {
       const { data, error } = await supabase
@@ -48,7 +36,6 @@ export const useSupabase = () => {
   return {
     saveAnalysisResult,
     loading,
-    error,
-    isConfigured: isSupabaseConfigured()
+    error
   };
 };

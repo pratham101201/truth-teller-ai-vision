@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
 export interface ProfileData {
@@ -20,13 +20,15 @@ export const useProfileData = (userId: string | undefined) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
+      if (!userId) return;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('first_name, last_name, avatar_url')
         .eq('id', userId)
         .maybeSingle();
 
-      if (error && !error.message.includes('relation "public.profiles" does not exist')) {
+      if (error) {
         toast({
           title: "Error loading profile",
           description: "There was a problem loading your profile information.",
@@ -47,6 +49,8 @@ export const useProfileData = (userId: string | undefined) => {
   const updateProfile = async (newData: Partial<ProfileData>) => {
     try {
       setLoading(true);
+      if (!userId) return;
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({ 
@@ -56,19 +60,11 @@ export const useProfileData = (userId: string | undefined) => {
         });
 
       if (error) {
-        if (error.message.includes('relation "public.profiles" does not exist')) {
-          toast({
-            title: "Database setup required",
-            description: "The profiles table needs to be created. Please follow the setup instructions.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error updating profile",
-            description: "There was a problem updating your profile.",
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Error updating profile",
+          description: "There was a problem updating your profile.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Profile updated",
