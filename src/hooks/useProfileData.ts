@@ -56,7 +56,7 @@ export const useProfileData = (userId: string | undefined) => {
         .upsert({ 
           id: userId,
           ...newData,
-          updated_at: new Date()
+          updated_at: new Date().toISOString() // Convert Date to ISO string
         });
 
       if (error) {

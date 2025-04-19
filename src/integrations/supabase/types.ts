@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analysis_results: {
+        Row: {
+          analysis_time: number | null
+          confidence_score: number
+          created_at: string | null
+          detection_areas: Json | null
+          detection_features: string[] | null
+          id: string
+          is_deepfake: boolean
+          media_metadata: Json | null
+          message: string | null
+          model_version: string | null
+          technique_used: string | null
+          user_id: string | null
+        }
+        Insert: {
+          analysis_time?: number | null
+          confidence_score: number
+          created_at?: string | null
+          detection_areas?: Json | null
+          detection_features?: string[] | null
+          id?: string
+          is_deepfake: boolean
+          media_metadata?: Json | null
+          message?: string | null
+          model_version?: string | null
+          technique_used?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          analysis_time?: number | null
+          confidence_score?: number
+          created_at?: string | null
+          detection_areas?: Json | null
+          detection_features?: string[] | null
+          id?: string
+          is_deepfake?: boolean
+          media_metadata?: Json | null
+          message?: string | null
+          model_version?: string | null
+          technique_used?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

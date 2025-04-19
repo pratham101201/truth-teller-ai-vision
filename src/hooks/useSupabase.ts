@@ -13,9 +13,23 @@ export const useSupabase = () => {
     setError(null);
 
     try {
+      // Extract the properties needed for the analysis_results table
+      const analysisData = {
+        is_deepfake: result.isDeepfake,
+        confidence_score: result.confidenceScore,
+        detection_areas: result.detectionAreas || null,
+        analysis_time: result.analysisTime,
+        message: result.message,
+        model_version: result.modelVersion || null,
+        detection_features: result.detectionFeatures || null,
+        technique_used: result.techniqueUsed || null,
+        media_metadata: result.mediaMetadata || null,
+        user_id: supabase.auth.getUser().then(({ data }) => data.user?.id) || null
+      };
+
       const { data, error } = await supabase
         .from('analysis_results')
-        .insert([result]);
+        .insert([analysisData]);
 
       if (error) throw error;
       return data;
