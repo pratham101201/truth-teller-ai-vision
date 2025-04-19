@@ -13,6 +13,10 @@ export const useSupabase = () => {
     setError(null);
 
     try {
+      // First get the user ID
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+
       // Extract the properties needed for the analysis_results table
       const analysisData = {
         is_deepfake: result.isDeepfake,
@@ -24,7 +28,7 @@ export const useSupabase = () => {
         detection_features: result.detectionFeatures || null,
         technique_used: result.techniqueUsed || null,
         media_metadata: result.mediaMetadata || null,
-        user_id: supabase.auth.getUser().then(({ data }) => data.user?.id) || null
+        user_id: userId || null
       };
 
       const { data, error } = await supabase
