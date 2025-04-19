@@ -30,6 +30,11 @@ const Profile = () => {
     fetchProfile();
   }, [user, navigate, fetchProfile]);
 
+  // Create a wrapper function to handle partial updates
+  const handleProfileChange = (data: Partial<ProfileData>) => {
+    setProfileData(prev => ({ ...prev, ...data }));
+  };
+
   if (!user) {
     return null;
   }
@@ -58,7 +63,7 @@ const Profile = () => {
                   profileData={profileData}
                   loading={loading}
                   onUpdateProfile={updateProfile}
-                  onChange={setProfileData}
+                  onChange={handleProfileChange}
                 />
               </TabsContent>
               
