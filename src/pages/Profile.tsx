@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User } from 'lucide-react';
 import { ProfileInformation } from '@/components/profile/ProfileInformation';
 import { AccountSettings } from '@/components/profile/AccountSettings';
-import { useProfileData } from '@/hooks/useProfileData';
+import { useProfileData, ProfileData } from '@/hooks/useProfileData';
 
 const Profile = () => {
   const { user } = useAuth();
