@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from 'lucide-react';
 import { ProfileData } from '@/hooks/useProfileData';
 
 interface ProfileInformationProps {
@@ -61,16 +59,9 @@ export const ProfileInformation = ({
           <Button 
             onClick={() => onUpdateProfile(profileData)}
             disabled={loading}
-            className="bg-truth-600 hover:bg-truth-700 relative"
+            className="bg-truth-600 hover:bg-truth-700"
           >
-            {loading ? (
-              <div className="flex items-center animate-pulse">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </div>
-            ) : (
-              'Save Changes'
-            )}
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
