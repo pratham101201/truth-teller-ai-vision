@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,19 @@ export const ProfileInformation = ({
   onUpdateProfile,
   onChange,
 }: ProfileInformationProps) => {
+  const [isDirty, setIsDirty] = useState(false);
+  
+  // Handle form changes and track if form is dirty (has changes)
+  const handleChange = (field: keyof ProfileData, value: string) => {
+    onChange({ [field]: value });
+    setIsDirty(true);
+  };
+  
+  // Reset dirty state when profileData changes from outside (e.g. after save)
+  useEffect(() => {
+    setIsDirty(false);
+  }, [loading]);
+
   return (
     <Card className="p-6">
       <div className="space-y-6">
@@ -42,7 +55,7 @@ export const ProfileInformation = ({
             <Input 
               id="firstName"
               value={profileData.first_name}
-              onChange={(e) => onChange({ first_name: e.target.value })}
+              onChange={(e) => handleChange('first_name', e.target.value)}
             />
           </div>
           
@@ -51,7 +64,7 @@ export const ProfileInformation = ({
             <Input 
               id="lastName"
               value={profileData.last_name}
-              onChange={(e) => onChange({ last_name: e.target.value })}
+              onChange={(e) => handleChange('last_name', e.target.value)}
             />
           </div>
         </div>
@@ -59,7 +72,7 @@ export const ProfileInformation = ({
         <div className="flex justify-end">
           <Button 
             onClick={() => onUpdateProfile(profileData)}
-            disabled={loading}
+            disabled={loading || !isDirty}
             className="bg-truth-600 hover:bg-truth-700"
           >
             {loading ? 'Save' : 'Save Changes'}
