@@ -22,16 +22,43 @@ export const ProfileInformation = ({
   onChange,
 }: ProfileInformationProps) => {
   const [isDirty, setIsDirty] = useState(false);
+  const [localProfile, setLocalProfile] = useState<ProfileData>(profileData);
   
-  // Handle form changes and track if form is dirty (has changes)
+  // Update local state when profileData changes from parent
+  useEffect(() => {
+    setLocalProfile(profileData);
+    setIsDirty(false);
+  }, [profileData]);
+  
+  // Handle form changes - track both local state and parent state
   const handleChange = (field: keyof ProfileData, value: string) => {
+    // Update local state
+    setLocalProfile(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Update parent state
     onChange({ [field]: value });
+    
+    // Mark form as dirty
     setIsDirty(true);
   };
-  
-  // Reset dirty state when profileData changes from outside (e.g. after save)
+
+  // Check if there are actual changes
   useEffect(() => {
-    setIsDirty(false);
+    const hasChanges = 
+      localProfile.first_name !== profileData.first_name || 
+      localProfile.last_name !== profileData.last_name;
+    
+    setIsDirty(hasChanges);
+  }, [localProfile, profileData]);
+  
+  // Reset dirty state after saving
+  useEffect(() => {
+    if (loading === false) {
+      setIsDirty(false);
+    }
   }, [loading]);
 
   return (
@@ -54,7 +81,7 @@ export const ProfileInformation = ({
             <Label htmlFor="firstName">First Name</Label>
             <Input 
               id="firstName"
-              value={profileData.first_name}
+              value={localProfile.first_name}
               onChange={(e) => handleChange('first_name', e.target.value)}
             />
           </div>
@@ -63,7 +90,7 @@ export const ProfileInformation = ({
             <Label htmlFor="lastName">Last Name</Label>
             <Input 
               id="lastName"
-              value={profileData.last_name}
+              value={localProfile.last_name}
               onChange={(e) => handleChange('last_name', e.target.value)}
             />
           </div>
@@ -71,11 +98,11 @@ export const ProfileInformation = ({
         
         <div className="flex justify-end">
           <Button 
-            onClick={() => onUpdateProfile(profileData)}
+            onClick={() => onUpdateProfile(localProfile)}
             disabled={loading || !isDirty}
             className="bg-truth-600 hover:bg-truth-700"
           >
-            {loading ? 'Save' : 'Save Changes'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
