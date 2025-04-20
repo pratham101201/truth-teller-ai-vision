@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +62,7 @@ export const ProfileInformation = ({
             disabled={loading}
             className="bg-truth-600 hover:bg-truth-700"
           >
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Save' : 'Save Changes'}
           </Button>
         </div>
       </div>
