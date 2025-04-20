@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import Navbar from '@/components/Navbar';
@@ -21,6 +21,12 @@ const Profile = () => {
     updateProfile
   } = useProfileData(user?.id);
   
+  const [formData, setFormData] = useState<ProfileData>({
+    first_name: '',
+    last_name: '',
+    avatar_url: null
+  });
+  
   useEffect(() => {
     if (!user) {
       navigate('/auth');
@@ -30,9 +36,26 @@ const Profile = () => {
     fetchProfile();
   }, [user, navigate, fetchProfile]);
 
-  // Create a wrapper function to handle partial updates
+  // Update local form state when profile data is loaded
+  useEffect(() => {
+    setFormData(profileData);
+  }, [profileData]);
+
+  // Handle changes to profile fields
   const handleProfileChange = (data: Partial<ProfileData>) => {
-    setProfileData(prev => ({ ...prev, ...data }));
+    console.log('Profile change:', data);
+    
+    // Update the form data state with the changes
+    setFormData(prev => ({
+      ...prev,
+      ...data
+    }));
+  };
+  
+  // Handle form submission
+  const handleUpdateProfile = (data: ProfileData) => {
+    console.log('Submitting update with data:', data);
+    updateProfile(data);
   };
 
   if (!user) {
@@ -60,9 +83,9 @@ const Profile = () => {
               <TabsContent value="profile">
                 <ProfileInformation
                   email={user.email || ''}
-                  profileData={profileData}
+                  profileData={formData}
                   loading={loading}
-                  onUpdateProfile={updateProfile}
+                  onUpdateProfile={handleUpdateProfile}
                   onChange={handleProfileChange}
                 />
               </TabsContent>
