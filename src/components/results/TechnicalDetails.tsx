@@ -1,14 +1,16 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { FileText } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { AnalysisResult } from '@/types/types';
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useToast } from "@/hooks/use-toast";
 
 interface TechnicalDetailsProps {
   result: AnalysisResult;
@@ -16,6 +18,53 @@ interface TechnicalDetailsProps {
 }
 
 const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ result, mediaFile }) => {
+  const { toast } = useToast();
+
+  const handleDownloadReport = () => {
+    try {
+      // Create the report content
+      const reportData = {
+        analysisResult: result,
+        mediaInfo: {
+          fileName: mediaFile.name,
+          fileType: mediaFile.type,
+          fileSize: mediaFile.size,
+        },
+        generatedAt: new Date().toISOString(),
+      };
+
+      // Convert to formatted JSON
+      const reportContent = JSON.stringify(reportData, null, 2);
+      
+      // Create Blob and download link
+      const blob = new Blob([reportContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create download link and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `deepfake-analysis-report-${new Date().getTime()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Report Downloaded",
+        description: "The full technical report has been downloaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the report.",
+        variant: "destructive",
+      });
+      console.error("Error downloading report:", error);
+    }
+  };
+
   return (
     <Card className="p-4 border border-slate-200">
       <div className="flex items-center gap-3 mb-3">
@@ -105,6 +154,18 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ result, mediaFile }
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      
+      <div className="flex justify-end mt-4">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-sm text-slate-500 flex items-center gap-1"
+          onClick={handleDownloadReport}
+        >
+          <Download className="h-3.5 w-3.5" />
+          Download full report
+        </Button>
+      </div>
     </Card>
   );
 };
