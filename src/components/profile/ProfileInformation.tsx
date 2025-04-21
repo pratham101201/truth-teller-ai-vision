@@ -21,25 +21,23 @@ export const ProfileInformation = ({
   onUpdateProfile,
   onChange,
 }: ProfileInformationProps) => {
-  const [isDirty, setIsDirty] = useState(false);
   const [localProfile, setLocalProfile] = useState<ProfileData>(profileData);
+  const [isDirty, setIsDirty] = useState(false);
   
   // Update local state when profileData changes from parent
   useEffect(() => {
+    console.log('ProfileData updated from parent:', profileData);
     setLocalProfile(profileData);
   }, [profileData]);
   
   // Handle form changes
   const handleChange = (field: keyof ProfileData, value: string) => {
-    // Update local state
     const updatedProfile = {
       ...localProfile,
       [field]: value
     };
     
     setLocalProfile(updatedProfile);
-    
-    // Update parent state
     onChange({ [field]: value });
   };
 
@@ -49,25 +47,14 @@ export const ProfileInformation = ({
       localProfile.first_name !== profileData.first_name || 
       localProfile.last_name !== profileData.last_name;
     
-    console.log('Checking changes:', {
-      localFirstName: localProfile.first_name,
-      profileFirstName: profileData.first_name,
-      localLastName: localProfile.last_name,
-      profileLastName: profileData.last_name,
+    console.log('Change detection:', {
+      localProfile,
+      profileData,
       hasChanges
     });
     
     setIsDirty(hasChanges);
   }, [localProfile, profileData]);
-  
-  // Reset dirty state after successful save
-  useEffect(() => {
-    if (!loading) {
-      console.log('Loading changed to false, checking if we need to reset dirty state');
-    }
-  }, [loading]);
-
-  console.log('Current state:', { isDirty, loading, disabled: loading || !isDirty });
 
   return (
     <Card className="p-6">
@@ -89,7 +76,7 @@ export const ProfileInformation = ({
             <Label htmlFor="firstName">First Name</Label>
             <Input 
               id="firstName"
-              value={localProfile.first_name}
+              value={localProfile.first_name || ''}
               onChange={(e) => handleChange('first_name', e.target.value)}
             />
           </div>
@@ -98,7 +85,7 @@ export const ProfileInformation = ({
             <Label htmlFor="lastName">Last Name</Label>
             <Input 
               id="lastName"
-              value={localProfile.last_name}
+              value={localProfile.last_name || ''}
               onChange={(e) => handleChange('last_name', e.target.value)}
             />
           </div>

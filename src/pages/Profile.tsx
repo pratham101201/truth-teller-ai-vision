@@ -15,7 +15,6 @@ const Profile = () => {
   const navigate = useNavigate();
   const {
     profileData,
-    setProfileData,
     loading,
     fetchProfile,
     updateProfile
@@ -38,12 +37,17 @@ const Profile = () => {
 
   // Update local form state when profile data is loaded
   useEffect(() => {
-    setFormData(profileData);
+    console.log('Profile data updated in Profile.tsx:', profileData);
+    setFormData({
+      first_name: profileData.first_name || '',
+      last_name: profileData.last_name || '',
+      avatar_url: profileData.avatar_url
+    });
   }, [profileData]);
 
   // Handle changes to profile fields
   const handleProfileChange = (data: Partial<ProfileData>) => {
-    console.log('Profile change:', data);
+    console.log('Profile change in Profile.tsx:', data);
     
     // Update the form data state with the changes
     setFormData(prev => ({
