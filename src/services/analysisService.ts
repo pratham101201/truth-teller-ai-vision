@@ -27,21 +27,44 @@ export const AnalysisService = {
         // Combine factors for a deterministic "random" number between 0-1
         const deterministicFactor = (fileNameSum / 1000 + fileSizeModifier) % 1;
         
-        // Adjust probability based on sensitivity level
+        // Adjust probability based on sensitivity level and analysis type
         let deepfakeProbability = deterministicFactor;
+        
+        // Apply sensitivity level adjustment
         if (request.sensitivityLevel === 'high') {
-          deepfakeProbability = deterministicFactor * 1.5; // More likely to detect as deepfake
+          deepfakeProbability = deterministicFactor * 1.3; // Less aggressive multiplier
         } else if (request.sensitivityLevel === 'low') {
           deepfakeProbability = deterministicFactor * 0.7; // Less likely to detect as deepfake
+        }
+        
+        // Enhanced analysis should be more accurate, not just more likely to detect deepfakes
+        // So for enhanced analysis, make the probability closer to its true value (0 or 1)
+        if (request.analysisType === 'enhanced') {
+          if (deepfakeProbability > 0.5) {
+            // If likely a deepfake, make more confident but don't always max out
+            deepfakeProbability = 0.7 + (deepfakeProbability * 0.3);
+          } else {
+            // If likely authentic, make more confident in authenticity
+            deepfakeProbability = deepfakeProbability * 0.7;
+          }
+        }
+        
+        // If prioritizing accuracy, increase confidence in the result, not the likelihood
+        if (request.prioritizeAccuracy) {
+          if (deepfakeProbability > 0.5) {
+            deepfakeProbability = Math.min(0.95, deepfakeProbability * 1.2);
+          } else {
+            deepfakeProbability = Math.max(0.05, deepfakeProbability * 0.8);
+          }
         }
         
         const isDeepfake = deepfakeProbability > 0.5;
         
         // Calculate confidence with more natural distribution
-        const baseConfidence = (deterministicFactor * 0.5) + 0.5; // Between 0.5 and 1.0
+        // Ensure confidence is high for both authentic and fake results
         const confidenceScore = isDeepfake 
-          ? baseConfidence
-          : 1 - (baseConfidence * 0.5); // Higher confidence for authentic media
+          ? 0.5 + (deepfakeProbability - 0.5) * 2 // Scale 0.5-1 to 0.5-1
+          : 0.5 + (0.5 - deepfakeProbability) * 2; // Scale 0-0.5 to 1-0.5
         
         // Generate detection areas with more realistic patterns if requested
         let detectionAreas = undefined;

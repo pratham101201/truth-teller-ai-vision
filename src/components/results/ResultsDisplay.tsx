@@ -117,12 +117,6 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                 
                 <TabsContent value="technical" className="mt-0 space-y-4">
                   <TechnicalDetails result={result} mediaFile={mediaFile} />
-                  
-                  <div className="flex justify-end">
-                    <Button variant="ghost" size="sm" className="text-sm text-slate-500">
-                      Download full report
-                    </Button>
-                  </div>
                 </TabsContent>
               </Tabs>
             </div>
