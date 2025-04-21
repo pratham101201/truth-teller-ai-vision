@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react';
 import { AnalysisResult } from '@/types/types';
 
 interface ResultStatusProps {
@@ -9,7 +9,8 @@ interface ResultStatusProps {
 }
 
 const ResultStatus: React.FC<ResultStatusProps> = ({ result }) => {
-  // Determine result status and styling
+  // Determine result status and styling with improved thresholds
+  // Note: We're now using stricter thresholds to classify results
   const getResultStatus = () => {
     if (result.isDeepfake) {
       return {
@@ -20,7 +21,8 @@ const ResultStatus: React.FC<ResultStatusProps> = ({ result }) => {
         textColor: "text-fake-dark",
         borderColor: "border-fake-DEFAULT"
       };
-    } else if (result.confidenceScore > 0.9) {
+    // Higher threshold for "Likely Authentic" classification
+    } else if (result.confidenceScore > 0.95) {
       return {
         icon: <CheckCircle className="h-10 w-10 text-verified-DEFAULT" />,
         title: "Likely Authentic",
@@ -29,11 +31,21 @@ const ResultStatus: React.FC<ResultStatusProps> = ({ result }) => {
         textColor: "text-verified-dark",
         borderColor: "border-verified-DEFAULT"
       };
+    // Expanded "uncertain" range for medium confidence
+    } else if (result.confidenceScore > 0.75) {
+      return {
+        icon: <Info className="h-10 w-10 text-blue-500" />,
+        title: "Probably Authentic",
+        description: "Our analysis leans toward authenticity, but we recommend caution.",
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-800",
+        borderColor: "border-blue-300"
+      };
     } else {
       return {
         icon: <AlertTriangle className="h-10 w-10 text-amber-500" />,
         title: "Analysis Inconclusive",
-        description: "We cannot determine with high confidence if this media is authentic or manipulated.",
+        description: "We cannot determine with confidence if this media is authentic or manipulated. Exercise caution.",
         bgColor: "bg-amber-50",
         textColor: "text-amber-800",
         borderColor: "border-amber-300"
@@ -70,3 +82,4 @@ const ResultStatus: React.FC<ResultStatusProps> = ({ result }) => {
 };
 
 export default ResultStatus;
+
