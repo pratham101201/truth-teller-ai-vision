@@ -78,89 +78,124 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     }
   }, [result, mediaPreview, mediaFile, showOriginal]);
 
+  // Render functions
+  const renderImageWithDetection = () => (
+    <div className="relative">
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-auto max-h-[500px] object-contain mx-auto"
+      />
+      <div className="absolute top-2 right-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                className="bg-white/80 hover:bg-white"
+                onClick={() => setShowOriginal(!showOriginal)}
+              >
+                {showOriginal ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {showOriginal ? 'Show manipulated areas' : 'Hide manipulated areas'}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    </div>
+  );
+
+  const renderVideo = () => (
+    <div className="relative">
+      <video 
+        src={mediaPreview} 
+        controls 
+        className="w-full h-auto max-h-[500px] object-contain mx-auto"
+      />
+      {result.isDeepfake && !showOriginal && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white text-center p-4">
+          <div className="max-w-md">
+            <AlertTriangle className="h-10 w-10 mx-auto mb-3" />
+            <h4 className="text-lg font-medium mb-2">Deepfake Video Detected</h4>
+            <p>Our analysis indicates this video contains manipulated content.</p>
+          </div>
+        </div>
+      )}
+      {result.isDeepfake && (
+        <div className="absolute top-2 right-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  className="bg-white/80 hover:bg-white"
+                  onClick={() => setShowOriginal(!showOriginal)}
+                >
+                  {showOriginal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showOriginal ? 'Show warning' : 'Hide warning'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
+    </div>
+  );
+  
+  const renderImage = () => (
+    <div className="relative">
+      <img 
+        src={mediaPreview} 
+        alt="Analyzed media" 
+        className="w-full h-auto max-h-[500px] object-contain mx-auto"
+      />
+      {result.isDeepfake && (
+        <div className="absolute top-2 right-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="secondary" 
+                  className="bg-white/80 hover:bg-white"
+                  onClick={() => setShowOriginal(!showOriginal)}
+                >
+                  {showOriginal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showOriginal ? 'Show manipulated areas' : 'Hide manipulated areas'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="relative bg-slate-100 rounded-lg overflow-hidden mb-4">
-      {result.isDeepfake && result.detectionAreas && result.detectionAreas.length > 0 && !showOriginal ? (
-        mediaFile.type.startsWith('image/') ? (
-          <div className="relative">
-            <canvas 
-              ref={canvasRef} 
-              className="w-full h-auto max-h-[500px] object-contain mx-auto"
-            />
-            <div className="absolute top-2 right-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="bg-white/80 hover:bg-white"
-                      onClick={() => setShowOriginal(!showOriginal)}
-                    >
-                      {showOriginal ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {showOriginal ? 'Show manipulated areas' : 'Hide manipulated areas'}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-        ) : (
-          <div className="relative">
-            <video 
-              src={mediaPreview} 
-              controls 
-              className="w-full h-auto max-h-[500px] object-contain mx-auto"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white text-center p-4">
-              <div className="max-w-md">
-                <AlertTriangle className="h-10 w-10 mx-auto mb-3" />
-                <h4 className="text-lg font-medium mb-2">Deepfake Video Detected</h4>
-                <p>Our analysis indicates this video contains manipulated content.</p>
-              </div>
-            </div>
-          </div>
-        )
-      ) : (
-        mediaFile.type.startsWith('image/') ? (
-          <div className="relative">
-            <img 
-              src={mediaPreview} 
-              alt="Analyzed media" 
-              className="w-full h-auto max-h-[500px] object-contain mx-auto"
-            />
-            {result.isDeepfake && (
-              <div className="absolute top-2 right-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        size="sm" 
-                        variant="secondary" 
-                        className="bg-white/80 hover:bg-white"
-                        onClick={() => setShowOriginal(!showOriginal)}
-                      >
-                        {showOriginal ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {showOriginal ? 'Show manipulated areas' : 'Hide manipulated areas'}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            )}
-          </div>
-        ) : (
-          <video
-            src={mediaPreview}
-            controls
-            className="w-full h-auto max-h-[500px] object-contain mx-auto"
-          />
-        )
-      )}
+      {/* For images with detection areas */}
+      {result.isDeepfake && 
+       result.detectionAreas && 
+       result.detectionAreas.length > 0 && 
+       !showOriginal && 
+       mediaFile.type.startsWith('image/') && renderImageWithDetection()}
+      
+      {/* For videos */}
+      {mediaFile.type.startsWith('video/') && renderVideo()}
+      
+      {/* For images without detection areas or when showing original */}
+      {(showOriginal || 
+        !result.isDeepfake || 
+        !result.detectionAreas || 
+        result.detectionAreas.length === 0) && 
+        mediaFile.type.startsWith('image/') && renderImage()}
     </div>
   );
 };
